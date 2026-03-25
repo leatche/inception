@@ -1,0 +1,90 @@
+services:
+
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    pull_policy: never
+    restart: always
+    ports:
+      - "443:443"
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress_data:/var/www/wordpress
+  
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb
+    pull_policy: never
+    restart: always
+    # ports:
+    #   - "3306:3306" // car la comnmunication entre maria db et wordpress ne se fait que par le reseau inception
+    networks:
+      - inception
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_root_password
+      - db_password
+
+  wordpress:
+    build: ./requirements/wordpress
+    image: wordpress
+    pull_policy: never
+    restart: always
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress_data:/var/www/wordpress
+    environment:
+      # Ces variables doivent être IDENTIQUES à celles de MariaDB
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      WP_ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+      MYSQL_HOSTNAME: mariadb
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      WP_TITLE: ${WP_TITLE}
+      WP_ADMIN_USER: ${WP_ADMIN_USER}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+      WP_USER: ${WP_USER}
+      WP_USER_EMAIL: ${WP_USER_EMAIL}
+    secrets:
+      - db_password
+      - admin_password
+
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
+  admin_password:
+    file: ../secrets/admin_password.txt
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ltcherep/data/mariadb
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ltcherep/data/wordpress
+
+
+networks:
+  inception:
+    driver: bridge
