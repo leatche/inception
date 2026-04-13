@@ -1,54 +1,64 @@
 *This project has been created as part of the 42 curriculum by ltcherep.*
 
-## Description
+# Description #
 
-Inception is a system administration project that sets up a small web infrastructure using Docker. The stack runs NGINX, WordPress (with php-fpm), and MariaDB — each in its own container, orchestrated via Docker Compose. All traffic enters through NGINX on port 443 with TLS encryption.
+Inception is a system administration project designed to deploy a secure, multi-container web infrastructure using Docker. The stack runs NGINX, WordPress (with PHP-FPM), and MariaDB—each isolated in its own container and orchestrated via Docker Compose.
 
-### Design Choices
 
-- **Base image**: Debian Bookworm (penultimate stable) for all three services, chosen for its package availability and stability.
-- **Secrets management**: Docker secrets are used for all passwords. No credentials are hardcoded in Dockerfiles or committed to Git.
-- **Entrypoint scripts**: Each service uses a shell script that reads secrets, performs first-run initialization, then `exec`s the main process as PID 1.
+The architecture is built on the principle of service isolation:
+- Entry Point: All traffic is routed through NGINX on port 443 with TLS v1.2/v1.3 encryption.
+- Processing: PHP-FPM acts as an independent backend service, communicating with NGINX via the FastCGI protocol (port 9000).
+- Security: all sensitive credentials are managed via Docker secrets (or environment files), ensuring no passwords are hardcoded in Dockerfiles or committed to the repository.
 
-### Virtual Machines vs Docker
 
-Virtual machines emulate entire hardware stacks and run a full guest OS, consuming significant memory and disk. Docker containers share the host kernel, isolating processes via cgroups and namespaces. This makes containers far lighter and faster to start, at the cost of weaker isolation (no separate kernel). In Inception, Docker is used to run each service as a lightweight, reproducible unit without the overhead of multiple OS instances.
+To meet the project requirements, several architectural choices were made based on the following comparisons:
 
-### Secrets vs Environment Variables
+1. Docker vs. Virtual Machines (VMs)
+The Difference: A VM is like a standalone house with its own walls, roof, and plumbing (a full operating system), which is very heavy. Docker is like an apartment in a building: it shares common resources (the system kernel) while remaining private and isolated.
 
-Environment variables are visible via `docker inspect`, in `/proc/<pid>/environ`, and can leak into logs. Docker secrets mount sensitive data as files under `/run/secrets/` inside containers, readable only by the target service, and never stored in image layers. This project uses Docker secrets for all passwords and credentials.
+The Choice: Docker was chosen for its light footprint, near-instant boot times, and its ability to run identically on any computer.
 
-### Docker Network vs Host Network
+2. Bridge Network vs. Host Network
+The Difference: In "Host" mode, all containers share the computer's phone line at the same time. In "Bridge" mode, every container gets its own private internal extension.
 
-Host networking removes isolation — containers share the host's network stack, which creates port conflicts and security risks. A bridge network (used here as `inception`) gives each container its own IP, enables DNS-based service discovery (e.g., `mariadb` hostname), and restricts external access to only explicitly published ports (443).
+The Choice: The Bridge network allows containers to talk to each other (e.g., WordPress calling MariaDB) without outside interference. Only the web server (NGINX) is authorized to answer "calls" from the public.
 
-### Docker Volumes vs Bind Mounts
+3. Docker Secrets vs. Environment Variables
+The Difference: Environment variables are like sticky notes left on a screen—anyone passing by can read them. Secrets are like a digital vault: the password only exists in the container's memory at the exact moment it is needed.
 
-Bind mounts map a specific host path into the container, tightly coupling the container to the host filesystem layout. Named volumes are managed by Docker, portable, and can use different storage drivers. This project uses named volumes with `local` driver and `device` options to store data at `/home/ltcherep/data/` as required by the subject.
+The Choice: This is the most secure method. No passwords are ever written in plain text in the code or committed to GitHub.
 
-## Instructions
+4. Docker Volumes vs. Bind Mounts
+The Difference: A "Bind Mount" depends on a specific folder on your computer (if you move the folder, everything breaks). A Volume is a dedicated storage space managed entirely by Docker.
 
-### Prerequisites
+The Choice: Volumes are faster and "cleaner." They ensure that your WordPress posts and database remain safe even if you stop or delete the containers.
 
-- A Linux VM with Docker and Docker Compose installed
-- `/etc/hosts` must contain: `127.0.0.1 ltcherep.42.fr`
+# Instructions #
 
-### Build and run
+Before starting, ensure your environment meets the following requirements:
 
-```bash
-make        # builds images and starts containers
-make down   # stops and removes containers
-make clean  # removes containers, volumes, and images
-make fclean # clean + removes host data directories
-make re     # full rebuild from scratch
-```
+System: A Linux VM with Docker and Docker Compose installed.
 
-### Access
+Local DNS: To access the site via the required domain, add the following entry to your /etc/hosts file: 127.0.0.1  ltcherep.42.fr
+
+The project is entirely managed via a Makefile to automate the Docker orchestration.
+
+- make
+- make down   # stops and removes containers
+- make clean
+- make fclean
+- make re
+
+Once the containers are up and running, you can reach the infrastructure through your browser:
 
 - Website: `https://ltcherep.42.fr`
 - WP Admin: `https://ltcherep.42.fr/wp-admin`
 
-## Resources
+Note: Since we use self-signed SSL certificates, your browser will display a security warning. You can safely bypass it by clicking "Advanced" and "Proceed".
+
+# Resources #
+
+To build this infrastructure, the following official documentations were used:
 
 - [Docker documentation](https://docs.docker.com/)
 - [Docker Compose reference](https://docs.docker.com/compose/compose-file/)
@@ -57,6 +67,10 @@ make re     # full rebuild from scratch
 - [MariaDB Knowledge Base](https://mariadb.com/kb/en/)
 - [Docker secrets documentation](https://docs.docker.com/engine/swarm/secrets/)
 
-### AI Usage
+In the spirit of transparency, AI was used as a collaborative partner during the development of this project.
 
-AI was used as a collaborative tool for reviewing configuration syntax (NGINX TLS directives, php-fpm pool configuration), debugging entrypoint script logic, and drafting documentation. All generated content was reviewed, tested, and adapted to the project's specific requirements.
+Logic & Debugging: Assisted in refining entrypoint scripts and debugging PHP-FPM pool configurations.
+
+Optimization: Aided in drafting NGINX TLS directives and streamlining the Docker Compose architecture.
+
+Documentation: Helped in structuring and polishing this README for better clarity.

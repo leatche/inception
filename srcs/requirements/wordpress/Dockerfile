@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x /usr/local/bin/wp
 
-RUN find /etc/php -name 'www.conf' -exec sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' {} \;
+COPY conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
 RUN mkdir -p /var/www/wordpress \
     && chown -R www-data:www-data /var/www/wordpress

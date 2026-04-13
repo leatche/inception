@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: tcherepoff <tcherepoff@student.42.fr>      +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2026/04/09 14:26:10 by tcherepoff        #+#    #+#              #
+#    Updated: 2026/04/09 14:26:11 by tcherepoff       ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 LOGIN		:= ltcherep
 DATA_DIR	:= /home/$(LOGIN)/data
 COMPOSE		:= docker compose -f srcs/docker-compose.yml --env-file srcs/.env
@@ -26,8 +38,9 @@ ps:
 	$(COMPOSE) ps
 
 create_dirs:
-	@mkdir -p $(DATA_DIR)/mariadb
-	@mkdir -p $(DATA_DIR)/wordpress
+	@sudo mkdir -p $(DATA_DIR)/mariadb
+	@sudo mkdir -p $(DATA_DIR)/wordpress
+	@sudo chown -R $(USER):$(USER) $(DATA_DIR)
 
 clean:
 	$(COMPOSE) down --volumes --rmi all

@@ -1,60 +1,35 @@
-# User Documentation
+# Services Overview
+The infrastructure provides a complete, secure environment for hosting a website. It is composed of three main services:
 
-## Services Provided
-This stack provides:
-- `nginx`: HTTPS reverse proxy (port `443`) and TLS termination.
-- `wordpress`: PHP-FPM + WordPress application.
-- `mariadb`: WordPress database backend.
+- Web Server (NGINX): The secure gateway. It handles all incoming requests and ensures they are encrypted (HTTPS).
 
-## Start And Stop
-From the project root:
+- Website Engine (WordPress): The core platform where the content is created and managed.
 
-```bash
-make
-```
+- Database (MariaDB): The secure "vault" where all your website’s data, posts, and user information are stored.
 
-Stop containers:
 
-```bash
-make down
-```
+# Managing the Project
+You can control the entire stack using simple commands from the terminal. Make sure you are in the project's root directory.
 
-Restart existing containers:
+Launching the Stack : make
+Stopping the Stack : make down
+Resetting the Project : make fclean
 
-```bash
-make restart
-```
 
-## Access The Website And Admin Panel
-1. Add this line to your `/etc/hosts`:
-   - `127.0.0.1 ltcherep.42.fr`
-2. Open:
-   - Website: `https://ltcherep.42.fr`
-   - Admin panel: `https://ltcherep.42.fr/wp-admin`
+# Accessing the Website
+Once the stack is running, you can access the platform via your web browser:
+ - Website: `https://ltcherep.42.fr`
+ - Admin panel: `https://ltcherep.42.fr/wp-admin`
 
-## Credentials Location
-Credentials are stored as Docker secrets in:
-- `secrets/db_root_password.txt`
-- `secrets/db_password.txt`
-- `secrets/admin_password.txt`
 
-They are mounted inside containers under `/run/secrets/`.
+# Credentials & Security
+To maintain high security, passwords and usernames are not written in the code.
 
-## Verify Services Health
-Check service status:
+- Location: All sensitive information is stored in a hidden environment file (.env) located at the root of the project.
+- Management: If you need to change a password, update the .env file and restart the stack with make re.
 
-```bash
-make ps
-```
 
-Follow logs:
+# Verify Services Health
+To verify that everything is running perfectly, you can use terminal
+ - docker ps # You should see three services listed (nginx, wordpress, mariadb) with the status "Up".
 
-```bash
-make logs
-```
-
-Quick HTTP check:
-
-```bash
-curl -k -I --resolve ltcherep.42.fr:443:127.0.0.1 https://ltcherep.42.fr
-```

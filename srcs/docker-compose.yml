@@ -1,5 +1,4 @@
 services:
-
   nginx:
     build: ./requirements/nginx
     image: nginx
@@ -19,8 +18,6 @@ services:
     image: mariadb
     pull_policy: never
     restart: always
-    # ports:
-    #   - "3306:3306" // car la comnmunication entre maria db et wordpress ne se fait que par le reseau inception
     networks:
       - inception
     volumes:
@@ -46,7 +43,6 @@ services:
     volumes:
       - wordpress_data:/var/www/wordpress
     environment:
-      # Ces variables doivent être IDENTIQUES à celles de MariaDB
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD_FILE: /run/secrets/db_password
@@ -83,7 +79,6 @@ volumes:
       type: none
       o: bind
       device: /home/ltcherep/data/wordpress
-
 
 networks:
   inception:

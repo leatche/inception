@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN mkdir -p /run/mysqld \
     && chown -R mysql:mysql /run/mysqld /var/lib/mysql
-# Dans ton Dockerfile MariaDB
 RUN rm -rf /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY conf/mariadb.conf /etc/mysql/my.cnf
 

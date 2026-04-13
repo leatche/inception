@@ -1,66 +1,39 @@
-# Developer Documentation
+# Environment Setup
+To replicate this infrastructure from scratch, you need to prepare the host environment and the configuration layer.
 
-## Environment Setup From Scratch
-Prerequisites:
-- Linux VM
-- Docker Engine + Docker Compose plugin
-- `make`
+Prerequisites
+-OS: Linux (Debian/Ubuntu recommended) or a compatible VM.
+-Tools: make, docker-engine, and docker-compose.
+-Network: Add the local domain to your /etc/hosts: echo "127.0.0.1 ltcherep.42.fr" | sudo tee -a /etc/hosts
 
-Project files:
-- Compose file: `srcs/docker-compose.yml`
-- Environment file: `srcs/.env`
-- Secrets files:
-  - `secrets/db_root_password.txt`
-  - `secrets/db_password.txt`
-  - `secrets/admin_password.txt`
+Configuration & Secrets
+The project relies on an .env file at the root to store sensitive data (DB names, user passwords, etc.).
+-Secrets Management: These variables are injected into the containers as environment variables or handled via Docker Secrets for enhanced security.
+-SSL Certificates: The NGINX container requires a TLS certificate (.crt) and a private key (.key) located in the specified secrets directory defined in the Dockerfile.
 
-Host directories used for persistent data:
-- `/home/ltcherep/data/mariadb`
-- `/home/ltcherep/data/wordpress`
 
-The Makefile creates these directories automatically in `make up`.
+# Build and Launch
+The project is entirely managed via a Makefile to automate the Docker orchestration.
 
-## Build And Launch
-Standard workflow from repository root:
+- make
+- make down   # stops and removes containers
+- make clean
+- make fclean
 
-```bash
-make          # build + up
-make down     # stop and remove containers/network
-make re       # full rebuild
-```
 
-Equivalent Compose command:
+# Container Management
+Check Logs: Monitor real-time output from all services:
+ - docker-compose logs -f
+Interactive Shell: Access a specific container (e.g., WordPress) to run commands:
+ - docker exec -it wordpress sh
+Network Inspection: Verify that containers are correctly isolated on the inception bridge:
+ - docker network inspect inception
 
-```bash
-docker compose -f srcs/docker-compose.yml --env-file srcs/.env up -d --build
-```
 
-## Container And Volume Management
-Useful commands:
+# Data Persistence & Volumes
+Volume Mapping : We use Docker Volumes to ensure data survives even if a container is deleted:
+ - db_data: Persists the MariaDB - database files.
+ - wp_data: Persists the WordPress source code and user uploads.
 
-```bash
-make ps
-make logs
-make stop
-make start
-docker compose -f srcs/docker-compose.yml --env-file srcs/.env exec -T wordpress sh
-docker compose -f srcs/docker-compose.yml --env-file srcs/.env exec -T mariadb sh
-```
-
-Cleanup commands:
-
-```bash
-make clean    # removes containers, volumes, images for the stack
-make fclean   # clean + removes /home/ltcherep/data
-```
-
-## Data Persistence
-Persistence is provided by Docker named volumes:
-- `mariadb_data` -> `/var/lib/mysql`
-- `wordpress_data` -> `/var/www/wordpress`
-
-These named volumes are configured with `local` driver options so data is stored on host under:
-- `/home/ltcherep/data/mariadb`
-- `/home/ltcherep/data/wordpress`
-
-Data survives container recreation and image rebuilds.
+Physical Storage : On the host machine, these volumes are mapped to specific directories (e.g., /home/ltcherep/data/).
+Destruction: Only make fclean (or an explicit docker volume rm) will delete the physical data on the host.
