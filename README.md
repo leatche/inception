@@ -18,10 +18,14 @@ The Difference: A VM is like a standalone house with its own walls, roof, and pl
 
 The Choice: Docker was chosen for its light footprint, near-instant boot times, and its ability to run identically on any computer.
 
+AI Usage: AI was used here as a learning tool to understand the fundamental concepts behind containerization and virtualization. It helped define specific vocabulary to system administration that was previously unknown.
+
 2. Bridge Network vs. Host Network
 The Difference: In "Host" mode, all containers share the computer's phone line at the same time. In "Bridge" mode, every container gets its own private internal extension.
 
 The Choice: The Bridge network allows containers to talk to each other (e.g., WordPress calling MariaDB) without outside interference. Only the web server (NGINX) is authorized to answer "calls" from the public.
+
+AI Usage: AI was used to understand Docker networking concepts from scratch, including terms like bridge, network driver, and port binding. It helped clarify why containers on the same custom bridge network can reach each other by service name, and why exposing only NGINX to the outside is a security best practice. 
 
 3. Docker Secrets vs. Environment Variables
 The Difference: Environment variables are like sticky notes left on a screen—anyone passing by can read them. Secrets are like a digital vault: the password only exists in the container's memory at the exact moment it is needed.
@@ -32,6 +36,8 @@ The Choice: This is the most secure method. No passwords are ever written in pla
 The Difference: A "Bind Mount" depends on a specific folder on your computer (if you move the folder, everything breaks). A Volume is a dedicated storage space managed entirely by Docker.
 
 The Choice: Volumes are faster and "cleaner." They ensure that your WordPress posts and database remain safe even if you stop or delete the containers.
+
+AI Usage: AI was used to understand the concept of data persistence in Docker and to learn the differences between storage strategies.
 
 # Instructions #
 

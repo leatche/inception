@@ -1,5 +1,6 @@
 services:
   nginx:
+    container_name: nginx
     build: ./requirements/nginx
     image: nginx
     pull_policy: never
@@ -14,6 +15,7 @@ services:
       - wordpress_data:/var/www/wordpress
   
   mariadb:
+    container_name: mariadb
     build: ./requirements/mariadb
     image: mariadb
     pull_policy: never
@@ -32,6 +34,7 @@ services:
       - db_password
 
   wordpress:
+    container_name: wordpress
     build: ./requirements/wordpress
     image: wordpress
     pull_policy: never

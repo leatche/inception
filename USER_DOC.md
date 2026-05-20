@@ -27,7 +27,10 @@ To maintain high security, passwords and usernames are not written in the code.
 
 - Location: All sensitive information is stored in a hidden environment file (.env) located at the root of the project.
 - Management: If you need to change a password, update the .env file and restart the stack with make re.
-
+- Create 3 documents for the secrets : 
+	admin_password.txt
+	db_password.txt
+	db_root_password.txt
 
 # Verify Services Health
 To verify that everything is running perfectly, you can use terminal
